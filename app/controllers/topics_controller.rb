@@ -1,8 +1,8 @@
 class TopicsController < ApplicationController
   def index
     @topics = Topic.all.includes(:favorite_users)
+    @comments = Comment.all
   end
-  
   
   def new
     @topic = Topic.new
@@ -10,7 +10,6 @@ class TopicsController < ApplicationController
   
   def create
     @topic = current_user.topics.new(topic_params)
-  
     if @topic.save
       redirect_to topics_path , success: '投稿に成功しました'
     else
@@ -18,10 +17,18 @@ class TopicsController < ApplicationController
       render :new
     end
   end
-
-private
-def topic_params
-  params.require(:topic).permit(:image , :description)
-end
+  
+  def destroy
+    #@topic = Topic.find_by(user_id: current_user.id)
+    @topic = Topic.find_by(user_id: current_user.id , description: params[:description] , image: params[:image])
+    @topic.destroy
+    redirect_to topics_path, success: '投稿を削除しました'
+  end
+  
+  
+  private
+  def topic_params
+    params.require(:topic).permit(:image , :description)
+  end
   
 end
